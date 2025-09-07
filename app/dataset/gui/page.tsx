@@ -38,7 +38,11 @@ export default function DatasetGUIPage() {
   const [playbackRate, setPlaybackRate] = useState(1)
   const [videoLoaded, setVideoLoaded] = useState(false)
   const [dataLoaded, setDataLoaded] = useState(false)
+  const [loadingProgress, setLoadingProgress] = useState(0)
+  const [estimatedTime, setEstimatedTime] = useState(0)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const loadingStartTimeRef = useRef<number>(0)
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Load dataset URLs on mount
   useEffect(() => {
@@ -62,32 +66,68 @@ export default function DatasetGUIPage() {
       setLoading(true)
       setDataLoaded(false)
       setVideoLoaded(false)
+      setLoadingProgress(0)
+      loadingStartTimeRef.current = Date.now()
+      
+      // Estimated times based on file sizes (in seconds)
+      const estimatedDataTime = 3
+      const estimatedVideoTime = 8
+      setEstimatedTime(estimatedDataTime + estimatedVideoTime)
       
       try {
+        // Clear any existing interval
+        if (progressIntervalRef.current) {
+          clearInterval(progressIntervalRef.current)
+        }
+        
+        // Simulate progress for data loading
+        progressIntervalRef.current = setInterval(() => {
+          const elapsed = (Date.now() - loadingStartTimeRef.current) / 1000
+          const progress = Math.min((elapsed / estimatedDataTime) * 50, 50)
+          setLoadingProgress(progress)
+        }, 100)
+        
         // Load JSON and video in parallel
         const [jsonResponse] = await Promise.allSettled([
           fetch(`/api/dataset/${selectedDataset}`)
         ])
 
+        if (progressIntervalRef.current) {
+          clearInterval(progressIntervalRef.current)
+          progressIntervalRef.current = null
+        }
+        setLoadingProgress(50)
+
         if (jsonResponse.status === 'fulfilled') {
           const data = await jsonResponse.value.json()
           setCurrentData(data)
           setDataLoaded(true)
+          setLoadingProgress(60)
         } else {
           console.error('Failed to load dataset data:', jsonResponse.reason)
         }
 
         // Set video URL separately to allow lazy loading
         setVideoUrl(datasetUrls[selectedDataset]['input.webm'])
+        setLoadingProgress(70)
         
       } catch (error) {
         console.error('Failed to load dataset data:', error)
       } finally {
         setLoading(false)
+        setLoadingProgress(100)
       }
     }
 
     loadDatasetData()
+    
+    // Cleanup function
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current)
+        progressIntervalRef.current = null
+      }
+    }
   }, [selectedDataset, datasetUrls])
 
   const handleStepClick = (time: number) => {
@@ -165,8 +205,63 @@ export default function DatasetGUIPage() {
       {/* Right Content */}
       <div className="flex-1 flex flex-col">
         {loading ? (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-lg text-gray-600">Loading dataset...</div>
+          <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+            <div className="max-w-md w-full mx-auto p-8">
+              <div className="text-center mb-8">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4">
+                  <svg className="w-8 h-8 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Loading Dataset {selectedDataset}</h3>
+                <p className="text-gray-600">Fetching data and preparing video content...</p>
+              </div>
+              
+              {/* Progress Bar */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                  <span>Progress</span>
+                  <span>{Math.round(loadingProgress)}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-blue-600 to-purple-600 rounded-full transition-all duration-300 ease-out relative"
+                    style={{ width: `${loadingProgress}%` }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Status and Time */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${dataLoaded ? 'bg-green-500' : 'bg-orange-500 animate-pulse'}`}></div>
+                    <span className={dataLoaded ? 'text-green-700' : 'text-orange-700'}>
+                      {dataLoaded ? 'Data loaded' : 'Loading data...'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${videoLoaded ? 'bg-green-500' : 'bg-blue-500 animate-pulse'}`}></div>
+                    <span className={videoLoaded ? 'text-green-700' : 'text-blue-700'}>
+                      {videoLoaded ? 'Video ready' : 'Preparing video...'}
+                    </span>
+                  </div>
+                </div>
+                
+                {estimatedTime > 0 && !dataLoaded && (
+                  <div className="text-center text-sm text-gray-500 bg-white/60 rounded-lg py-2 px-4">
+                    <span>Estimated time: ~{estimatedTime} seconds</span>
+                  </div>
+                )}
+                
+                <div className="text-center text-xs text-gray-400">
+                  <p>Large files may take longer on slower connections</p>
+                </div>
+              </div>
+            </div>
           </div>
         ) : currentData ? (
           <div className="flex-1 flex flex-col overflow-hidden">
@@ -206,9 +301,26 @@ export default function DatasetGUIPage() {
                             preload="metadata"
                             onPlay={() => setIsPlaying(true)}
                             onPause={() => setIsPlaying(false)}
-                            onLoadedData={() => setVideoLoaded(true)}
+                            onLoadedData={() => {
+                              setVideoLoaded(true)
+                              setLoadingProgress(90)
+                            }}
                             onWaiting={() => setVideoLoaded(false)}
-                            onCanPlay={() => setVideoLoaded(true)}
+                            onCanPlay={() => {
+                              setVideoLoaded(true)
+                              setLoadingProgress(100)
+                            }}
+                            onProgress={(e) => {
+                              const video = e.currentTarget
+                              if (video.buffered.length > 0) {
+                                const bufferedEnd = video.buffered.end(video.buffered.length - 1)
+                                const duration = video.duration
+                                if (duration > 0) {
+                                  const bufferProgress = (bufferedEnd / duration) * 30 // 30% of total progress for buffering
+                                  setLoadingProgress(prev => Math.max(prev, 70 + bufferProgress))
+                                }
+                              }
+                            }}
                           >
                             Your browser does not support video playback.
                           </video>
