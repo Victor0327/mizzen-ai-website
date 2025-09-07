@@ -151,7 +151,7 @@ export function Navigation() {
               href="#"
               className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-dark transition-colors"
             >
-              Get Started
+              Book a Demo
             </Link>
           </div>
         </div>
@@ -213,7 +213,7 @@ export function Navigation() {
                   href="#"
                   className="block rounded-lg bg-primary px-3 py-2.5 text-base font-semibold text-white text-center"
                 >
-                  Get Started
+                  Book a Demo
                 </Link>
               </div>
             </div>

@@ -1,0 +1,27 @@
+[
+  {
+    "id": "gui",
+    "name": "GUI",
+    "desc": "A comprehensive GUI dataset for training models to understand and interact with graphical user interfaces"
+  },
+  {
+    "id": "medical-imaging",
+    "name": "Medical Imaging",
+    "desc": "High-quality medical imaging dataset with expert annotations for diagnostic AI applications"
+  },
+  {
+    "id": "conversational-ai",
+    "name": "Conversational AI",
+    "desc": "Curated dialogue dataset for training conversational AI models with human feedback"
+  },
+  {
+    "id": "code-generation",
+    "name": "Code Generation",
+    "desc": "Multi-language code dataset with paired natural language descriptions and implementations"
+  },
+  {
+    "id": "autonomous-driving",
+    "name": "Autonomous Driving",
+    "desc": "Real-world driving scenarios dataset with sensor data and human-verified annotations"
+  }
+]
