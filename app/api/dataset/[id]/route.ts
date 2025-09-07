@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // Simple in-memory cache with TTL
-const cache = new Map<string, { data: any; timestamp: number }>()
+const cache = new Map<string, { data: unknown; timestamp: number }>()
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
 export async function GET(
