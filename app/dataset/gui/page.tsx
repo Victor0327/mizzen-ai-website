@@ -115,26 +115,34 @@ export default function DatasetGUIPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Left Sidebar */}
-      <div className="w-64 bg-white shadow-lg overflow-y-auto">
-        <div className="p-4 border-b">
+      <div className="w-64 bg-white shadow-lg flex flex-col">
+        <div className="p-4 border-b flex-shrink-0">
           <h2 className="text-lg font-semibold text-gray-800">GUI Datasets</h2>
           <p className="text-sm text-gray-600">{datasetKeys.length} datasets available</p>
         </div>
         
-        <div className="p-2">
-          {datasetKeys.map((key) => (
-            <button
-              key={key}
-              onClick={() => setSelectedDataset(key)}
-              className={`w-full text-left px-3 py-2 rounded-lg mb-1 transition-colors ${
-                selectedDataset === key
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                  : 'hover:bg-gray-100 text-gray-700'
-              }`}
-            >
-              {key}
-            </button>
-          ))}
+        <div className="flex-1 min-h-0 custom-scrollbar" style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 120px)' }}>
+          <div className="p-2">
+            {datasetKeys.map((key) => (
+              <button
+                key={key}
+                onClick={() => setSelectedDataset(key)}
+                disabled={loading}
+                className={`w-full text-left px-3 py-2 rounded-lg mb-1 transition-all duration-200 relative ${
+                  selectedDataset === key
+                    ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                    : 'hover:bg-gray-100 text-gray-700'
+                } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <div className="flex items-center justify-between">
+                  <span>{key}</span>
+                  {loading && selectedDataset === key && (
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -145,18 +153,18 @@ export default function DatasetGUIPage() {
             <div className="text-lg text-gray-600">Loading dataset...</div>
           </div>
         ) : currentData ? (
-          <div className="flex-1 flex flex-col p-6 overflow-hidden">
-            {/* Header */}
-            <div className="mb-6">
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Fixed Header */}
+            <div className="p-6 pb-0 flex-shrink-0">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Dataset: {selectedDataset}</h1>
-              <div className="h-px bg-gradient-to-r from-blue-200 to-transparent"></div>
+              <div className="h-px bg-gradient-to-r from-blue-200 to-transparent mb-6"></div>
             </div>
 
-            {/* Main Content */}
-            <div className="flex gap-8 flex-1 overflow-hidden">
-              {/* Center Column: Video + Instruction + Results */}
+            {/* Main Content with fixed video */}
+            <div className="flex gap-8 flex-1 overflow-hidden px-6 pb-6">
+              {/* Center Column: Fixed Video + Scrollable Content */}
               <div className="flex-1 flex flex-col gap-6 overflow-hidden">
-                {/* Video Player */}
+                {/* Fixed Video Player */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 flex-shrink-0">
                   <div className="flex items-center p-6 pb-4">
                     <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
@@ -164,8 +172,8 @@ export default function DatasetGUIPage() {
                   </div>
                   {videoUrl && (
                     <>
-                      <div className="px-0">
-                        <div className="relative bg-black overflow-hidden shadow-lg" style={{ aspectRatio: '16/9', maxHeight: '500px' }}>
+                      <div className="px-6 flex justify-center">
+                        <div className="relative bg-black overflow-hidden shadow-lg" style={{ aspectRatio: '16/9', maxHeight: '500px', maxWidth: '100%' }}>
                           <video
                             ref={videoRef}
                             src={videoUrl}
@@ -218,8 +226,8 @@ export default function DatasetGUIPage() {
                   )}
                 </div>
 
-                {/* Bottom content with scrollable area */}
-                <div className="flex-1 flex flex-col gap-6 overflow-y-auto">
+                {/* Scrollable Bottom Content */}
+                <div className="flex-1 flex flex-col gap-6 overflow-y-auto min-h-0">
                   {/* Instruction */}
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex-shrink-0">
                     <div className="flex items-center mb-4">
@@ -248,18 +256,24 @@ export default function DatasetGUIPage() {
                 </div>
               </div>
 
-              {/* Right Column: Actions Timeline */}
-              <div className="w-80 flex flex-col overflow-hidden">
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 flex-1 overflow-hidden">
-                  <div className="p-6 border-b border-gray-100">
+              {/* Right Column: Actions Timeline - Independent Scroll */}
+              <div className="w-80 flex flex-col min-h-0">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 flex-1 flex flex-col min-h-0">
+                  <div className="p-6 border-b border-gray-100 flex-shrink-0">
                     <div className="flex items-center">
                       <span className="w-2 h-2 bg-orange-500 rounded-full mr-3"></span>
                       <h3 className="text-lg font-semibold text-gray-800">Actions Timeline</h3>
                     </div>
                   </div>
                   
-                  <div className="p-4 h-full overflow-y-auto">
-                    <div className="space-y-3">
+                  <div 
+                    className="flex-1 min-h-0 custom-scrollbar" 
+                    style={{ 
+                      overflowY: 'auto',
+                      maxHeight: 'calc(100vh - 200px)' 
+                    }}
+                  >
+                    <div className="p-4 space-y-3">
                       {currentData.actions.map((action, actionIndex) => (
                         <div key={actionIndex} className="border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-shadow">
                           <h4 className="font-medium text-gray-800 mb-3 text-sm flex items-center">

@@ -5,51 +5,44 @@ import Image from 'next/image'
 export function TrustIndicators() {
   const companies = [
     {
-      name: 'OpenAI',
-      logo: 'https://logo.clearbit.com/openai.com',
-      fallback:
-        'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons@v9/icons/openai.svg',
+      name: '清华大学',
+      logo: '/logos/tsinghua.png',
+      fallback: '/logos/tsinghua.png',
     },
     {
-      name: 'Google',
-      logo: 'https://logo.clearbit.com/google.com',
-      fallback:
-        'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons@v9/icons/google.svg',
+      name: '北京大学',
+      logo: '/logos/pku.png',
+      fallback: '/logos/pku.png',
     },
     {
-      name: 'Anthropic',
-      logo: 'https://logo.clearbit.com/anthropic.com',
-      fallback: 'https://avatars.githubusercontent.com/u/100435473?s=200&v=4',
+      name: '中科院',
+      logo: '/logos/cas.png',
+      fallback: '/logos/cas.png',
     },
     {
-      name: 'Microsoft',
-      logo: 'https://logo.clearbit.com/microsoft.com',
-      fallback:
-        'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons@v9/icons/microsoft.svg',
+      name: '复旦大学',
+      logo: '/logos/fudan.png',
+      fallback: '/logos/fudan.png',
     },
     {
-      name: 'Meta',
-      logo: 'https://logo.clearbit.com/meta.com',
-      fallback:
-        'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons@v9/icons/meta.svg',
+      name: '上海交大',
+      logo: '/logos/sjtu.png',
+      fallback: '/logos/sjtu.png',
     },
     {
-      name: 'Tesla',
-      logo: 'https://logo.clearbit.com/tesla.com',
-      fallback:
-        'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons@v9/icons/tesla.svg',
+      name: '浙江大学',
+      logo: '/logos/zju.png',
+      fallback: '/logos/zju.png',
     },
     {
-      name: 'Apple',
-      logo: 'https://logo.clearbit.com/apple.com',
-      fallback:
-        'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons@v9/icons/apple.svg',
+      name: '南京大学',
+      logo: '/logos/nju.png',
+      fallback: '/logos/nju.png',
     },
     {
-      name: 'Amazon',
-      logo: 'https://logo.clearbit.com/amazon.com',
-      fallback:
-        'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons@v9/icons/amazon.svg',
+      name: '华中科技',
+      logo: '/logos/hust.png',
+      fallback: '/logos/hust.png',
     },
   ]
 

@@ -1,4 +1,5 @@
-import { Database, Brain, BarChart3, Workflow } from 'lucide-react'
+import { Database, Brain, BarChart3, Workflow, ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 
 const features = [
   {
@@ -47,6 +48,16 @@ export function Features() {
             Everything you need to build, train, and deploy production-ready AI
             systems
           </p>
+          
+          <div className="mt-8">
+            <Link href="/dataset/gui">
+              <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-sm hover:shadow-md group cursor-pointer">
+                <Database className="h-5 w-5" />
+                <span className="font-medium">Explore GUI Datasets</span>
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
