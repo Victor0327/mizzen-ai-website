@@ -6,7 +6,7 @@ import { Play, Pause, ExternalLink } from 'lucide-react'
 interface InnerAction {
   type: string
   url: string
-  info: Record<string, any>
+  info: Record<string, unknown>
   time: number
   _delete: boolean
 }
