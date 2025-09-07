@@ -36,6 +36,8 @@ export default function DatasetGUIPage() {
   const [videoUrl, setVideoUrl] = useState<string>('')
   const [isPlaying, setIsPlaying] = useState(false)
   const [playbackRate, setPlaybackRate] = useState(1)
+  const [videoLoaded, setVideoLoaded] = useState(false)
+  const [dataLoaded, setDataLoaded] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   // Load dataset URLs on mount
@@ -52,18 +54,32 @@ export default function DatasetGUIPage() {
     loadDatasetUrls()
   }, [])
 
-  // Load selected dataset data
+  // Load selected dataset data with performance optimizations
   useEffect(() => {
     const loadDatasetData = async () => {
       if (!datasetUrls[selectedDataset]) return
 
       setLoading(true)
+      setDataLoaded(false)
+      setVideoLoaded(false)
+      
       try {
-        // Use API route to avoid CORS issues
-        const jsonResponse = await fetch(`/api/dataset/${selectedDataset}`)
-        const data = await jsonResponse.json()
-        setCurrentData(data)
+        // Load JSON and video in parallel
+        const [jsonResponse] = await Promise.allSettled([
+          fetch(`/api/dataset/${selectedDataset}`)
+        ])
+
+        if (jsonResponse.status === 'fulfilled') {
+          const data = await jsonResponse.value.json()
+          setCurrentData(data)
+          setDataLoaded(true)
+        } else {
+          console.error('Failed to load dataset data:', jsonResponse.reason)
+        }
+
+        // Set video URL separately to allow lazy loading
         setVideoUrl(datasetUrls[selectedDataset]['input.webm'])
+        
       } catch (error) {
         console.error('Failed to load dataset data:', error)
       } finally {
@@ -174,15 +190,27 @@ export default function DatasetGUIPage() {
                     <>
                       <div className="px-6 flex justify-center">
                         <div className="relative bg-black overflow-hidden shadow-lg" style={{ aspectRatio: '16/9', maxHeight: '500px', maxWidth: '100%' }}>
+                          {!videoLoaded && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
+                              <div className="text-center text-white">
+                                <div className="animate-spin rounded-full h-12 w-12 border-2 border-white border-t-transparent mx-auto mb-4"></div>
+                                <p className="text-sm">Loading video...</p>
+                              </div>
+                            </div>
+                          )}
                           <video
                             ref={videoRef}
                             src={videoUrl}
                             className="w-full h-full object-contain"
                             controls
+                            preload="metadata"
                             onPlay={() => setIsPlaying(true)}
                             onPause={() => setIsPlaying(false)}
+                            onLoadedData={() => setVideoLoaded(true)}
+                            onWaiting={() => setVideoLoaded(false)}
+                            onCanPlay={() => setVideoLoaded(true)}
                           >
-                            Your browser does not support video playbook.
+                            Your browser does not support video playback.
                           </video>
                         </div>
                       </div>
@@ -218,8 +246,22 @@ export default function DatasetGUIPage() {
                           </div>
                         </div>
 
-                        <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
-                          Click action steps to jump to timestamp
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <div className="bg-gray-50 px-3 py-1 rounded-full">
+                            Click action steps to jump to timestamp
+                          </div>
+                          {!dataLoaded && (
+                            <div className="flex items-center gap-2 bg-orange-50 text-orange-700 px-3 py-1 rounded-full">
+                              <div className="animate-spin rounded-full h-3 w-3 border border-orange-600 border-t-transparent"></div>
+                              <span className="text-xs">Loading data...</span>
+                            </div>
+                          )}
+                          {dataLoaded && !videoLoaded && (
+                            <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
+                              <div className="animate-spin rounded-full h-3 w-3 border border-blue-600 border-t-transparent"></div>
+                              <span className="text-xs">Loading video...</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </>
